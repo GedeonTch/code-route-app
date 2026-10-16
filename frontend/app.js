@@ -18,6 +18,65 @@ const CATEGORY_LABELS = {
   information: "Information",
 };
 
+// ─── DÉMO HÉBERGÉE (Render) : bannière + écran d'attente ─────────────────────
+
+// La bannière d'information ne s'affiche que sur l'hébergement gratuit,
+// jamais en développement local.
+const EST_DEMO_HEBERGEE = /\.onrender\.com$/.test(window.location.hostname);
+
+let splashAffichageTimer = null;
+
+function initDemoBanner() {
+  if (!EST_DEMO_HEBERGEE) return;
+  if (localStorage.getItem("permis_demo_banner_off") === "1") return;
+  const banner = document.getElementById("demoBanner");
+  if (banner) banner.classList.remove("hidden");
+}
+
+function fermerDemoBanner() {
+  localStorage.setItem("permis_demo_banner_off", "1");
+  const banner = document.getElementById("demoBanner");
+  if (banner) banner.classList.add("hidden");
+}
+
+/**
+ * Teste la disponibilité de l'API au chargement.
+ * L'écran d'attente n'apparaît que si la réponse tarde (> 1,5 s) : typiquement
+ * le réveil du service gratuit Render (30-60 s), invisible en local.
+ * En cas d'échec, propose un bouton « Réessayer » au lieu de rester muet.
+ */
+async function verifierDisponibiliteApi() {
+  const overlay = document.getElementById("splashOverlay");
+  const spinner = document.getElementById("splashSpinner");
+  const details = document.getElementById("splashDetail");
+  const retryBtn = document.getElementById("splashRetry");
+  if (!overlay || !spinner || !details || !retryBtn) return;
+
+  // État initial : spinner + message d'attente
+  spinner.classList.remove("hidden");
+  retryBtn.classList.add("hidden");
+  details.textContent =
+    "Sur l'hébergement gratuit, le service se met en veille : le premier chargement peut prendre 30 à 60 secondes.";
+
+  splashAffichageTimer = setTimeout(
+    () => overlay.classList.remove("hidden"),
+    1500
+  );
+
+  try {
+    await apiGet("/panneaux");
+    clearTimeout(splashAffichageTimer);
+    overlay.classList.add("hidden");
+  } catch (e) {
+    clearTimeout(splashAffichageTimer);
+    overlay.classList.remove("hidden");
+    spinner.classList.add("hidden");
+    details.textContent =
+      "Le serveur ne répond pas pour le moment. S'il sort de veille, le réveil peut prendre jusqu'à une minute.";
+    retryBtn.classList.remove("hidden");
+  }
+}
+
 // ─── ÉTAT GLOBAL DE L'APPLICATION ────────────────────────────────────────────
 
 const state = {
@@ -2789,6 +2848,18 @@ function initRoadNetwork() {
 // ─── INITIALISATION ET EVENT LISTENERS ───────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ── 0. Bannière démo (Render uniquement) + disponibilité de l'API ──
+  initDemoBanner();
+  verifierDisponibiliteApi();
+  const demoBannerClose = document.getElementById("demoBannerClose");
+  if (demoBannerClose) {
+    demoBannerClose.addEventListener("click", fermerDemoBanner);
+  }
+  const splashRetry = document.getElementById("splashRetry");
+  if (splashRetry) {
+    splashRetry.addEventListener("click", verifierDisponibiliteApi);
+  }
+
   // ── 1. Restaurer le thème sauvegardé ──
   const savedTheme = localStorage.getItem("permis_theme") || "cockpit";
   setTheme(savedTheme);

@@ -529,7 +529,12 @@ def seed_utilisateur_demo(conn):
 
 
 def seed_admin_defaut(conn):
-    """Ajoute un compte admin par défaut s'il n'existe encore aucun administrateur."""
+    """Ajoute un compte admin par défaut s'il n'existe encore aucun administrateur.
+
+    Le mot de passe provient de la variable d'environnement PERMIS_ADMIN_PASSWORD.
+    Sans variable définie, un mot de passe de développement est utilisé : il
+    convient exclusivement à un usage local (jamais à un déploiement public).
+    """
     admin_existant = conn.execute(
         "SELECT id FROM utilisateurs WHERE role = 'admin' LIMIT 1"
     ).fetchone()
@@ -538,6 +543,13 @@ def seed_admin_defaut(conn):
         print("  → Un administrateur existe déjà, insertion ignorée.")
         return
 
+    mot_de_passe = os.environ.get("PERMIS_ADMIN_PASSWORD")
+    if mot_de_passe:
+        source = "défini via PERMIS_ADMIN_PASSWORD"
+    else:
+        mot_de_passe = "admin1234"
+        source = "MOT DE PASSE DE DÉVELOPPEMENT PAR DÉFAUT (définir PERMIS_ADMIN_PASSWORD en production)"
+
     conn.execute(
         """INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role)
            VALUES (?, ?, ?, ?, ?)""",
@@ -545,14 +557,12 @@ def seed_admin_defaut(conn):
             "Admin",
             "PERMIS+",
             "admin@permis.local",
-            hash_password("admin1234"),
+            hash_password(mot_de_passe),
             "admin",
         ),
     )
     conn.commit()
-    print(
-        "  ✓ Compte admin par défaut inséré (email: admin@permis.local, mdp: admin1234)."
-    )
+    print(f"  ✓ Compte admin inséré (email: admin@permis.local, mot de passe : {source}).")
 
 
 def seed():

@@ -4,6 +4,26 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>PERMIS+ — Code de la Route</title>
+
+        <!-- SEO & partage social -->
+        <meta
+            name="description"
+            content="Application web pédagogique d'auto-école : catalogue de panneaux de signalisation, quiz QCM notés, bot d'indices ROADY, progression par niveaux et certifications. Projet académique — Université Lumière de Bujumbura."
+        />
+        <meta name="theme-color" content="#0b0f1a" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="PERMIS+ — Code de la Route" />
+        <meta
+            property="og:description"
+            content="Catalogue de 20 panneaux, quiz QCM notés, bot d'indices, progression par niveaux et certifications."
+        />
+        <!-- Après déploiement, remplacer par l'URL absolue :
+             https://<votre-service>.onrender.com/og-image.png -->
+        <meta property="og:image" content="og-image.png" />
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
         <!-- Google Fonts -->
         <link
             href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
@@ -15,6 +35,22 @@
         <!-- BANDEAU ADMIN (visible uniquement pour les admins) -->
         <div id="adminRibbon" class="admin-ribbon hidden">
             MODE ADMINISTRATION
+        </div>
+
+        <!-- BANDEAU DÉMO (affiché uniquement sur l'hébergement gratuit Render) -->
+        <div id="demoBanner" class="demo-banner hidden" role="note">
+            <span>
+                Démo hébergée gratuitement — premier chargement 30 à 60 s ·
+                données réinitialisées périodiquement.
+            </span>
+            <button
+                id="demoBannerClose"
+                class="demo-banner-close"
+                type="button"
+                aria-label="Masquer ce bandeau"
+            >
+                ×
+            </button>
         </div>
 
         <!-- NAVBAR (cachée sur landing) -->
@@ -1418,6 +1454,26 @@
         </div>
 
         <!-- Scripts -->
+        <!-- ÉCRAN D'ATTENTE (affiché si l'API tarde à répondre, ex. réveil du
+             service gratuit Render après une période d'inactivité) -->
+        <div id="splashOverlay" class="splash-overlay hidden" role="status">
+            <div class="splash-card">
+                <div
+                    id="splashSpinner"
+                    class="splash-spinner"
+                    aria-hidden="true"
+                ></div>
+                <p class="splash-title">Connexion au serveur…</p>
+                <p id="splashDetail" class="splash-detail">
+                    Sur l'hébergement gratuit, le service se met en veille :
+                    le premier chargement peut prendre 30 à 60 secondes.
+                </p>
+                <button id="splashRetry" class="splash-retry hidden" type="button">
+                    Réessayer
+                </button>
+            </div>
+        </div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
         <script src="app.js"></script>

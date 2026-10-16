@@ -3997,3 +3997,123 @@ body.admin-mode .quiz-container {
     .cert-details-grid { grid-template-columns: 1fr; }
     .cert-footer { flex-direction: column; gap: 1rem; align-items: center; }
 }
+
+/* ─── BANDEAU DÉMO (hébergement gratuit Render) ──────────────────────────── */
+
+.demo-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 8px 40px 8px 16px;
+    background: rgba(11, 15, 26, 0.92);
+    border-top: 1px solid rgba(232, 160, 32, 0.4);
+    color: #ffc857;
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    text-align: center;
+    backdrop-filter: blur(6px);
+}
+
+.demo-banner-close {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #ffc857;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 4px 8px;
+}
+
+.demo-banner-close:hover {
+    opacity: 1;
+}
+
+/* ─── ÉCRAN D'ATTENTE (réveil du service / API indisponible) ─────────────── */
+
+.splash-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(11, 15, 26, 0.9);
+    backdrop-filter: blur(4px);
+}
+
+.splash-card {
+    max-width: 420px;
+    margin: 0 24px;
+    padding: 40px 32px;
+    text-align: center;
+    background: #141a2b;
+    border: 1px solid rgba(232, 160, 32, 0.35);
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.splash-spinner {
+    width: 42px;
+    height: 42px;
+    margin: 0 auto 20px;
+    border: 3px solid rgba(232, 160, 32, 0.2);
+    border-top-color: #e8a020;
+    border-radius: 50%;
+    animation: splash-spin 0.9s linear infinite;
+}
+
+@keyframes splash-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Accessibilité : pas de rotation si l'utilisateur préfère réduire les animations */
+@media (prefers-reduced-motion: reduce) {
+    .splash-spinner {
+        animation: none;
+    }
+}
+
+.splash-title {
+    margin: 0 0 10px;
+    font-family: "Orbitron", sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+    color: #f5f7fa;
+}
+
+.splash-detail {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #9aa4b8;
+}
+
+.splash-retry {
+    margin-top: 22px;
+    padding: 10px 26px;
+    background: #e8a020;
+    border: none;
+    border-radius: 8px;
+    color: #0b0f1a;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.splash-retry:hover {
+    transform: translateY(-1px);
+}

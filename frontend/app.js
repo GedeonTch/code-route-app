@@ -5,8 +5,10 @@
 
 // ─── CONSTANTES ET CONFIGURATION ─────────────────────────────────────────────
 
-const API = "http://localhost:8080/api";
-const PANNEAUX_URL = "http://localhost:8080/panneaux";
+// Chemins relatifs : en production (Render) l'API et le frontend sont servis
+// par le même service (même origine) ; en local uvicorn sert aussi les deux.
+const API = "/api";
+const PANNEAUX_URL = "/panneaux";
 
 // Libellés lisibles côté interface pour les catégories backend.
 const CATEGORY_LABELS = {

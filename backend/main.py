@@ -12,7 +12,7 @@ from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .database import get_db_connection
+from .database import get_db_connection, init_db
 from .models import (
     AdminPanneauCreate,
     AdminPanneauUpdate,
@@ -35,7 +35,9 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Middleware CORS — autorise toutes les origines (développement)
+# Middleware CORS — permissif volontairement : en production le frontend et
+# l'API sont servis par le même service (même origine, CORS inactif), mais
+# cela permet aussi d'ouvrir frontend/index.html directement en développement.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -1612,3 +1614,49 @@ def get_certifications_utilisateur(user_id: int):
         return result
     finally:
         conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Initialisation au démarrage du serveur
+# ---------------------------------------------------------------------------
+
+
+@app.on_event("startup")
+def initialiser_base() -> None:
+    """Crée les tables et peuple la base à chaque démarrage.
+
+    Indispensable en déploiement (Render) : le système de fichiers du service
+    est éphémère, la base SQLite est donc recréée et re-seedée à chaque
+    (re)démarrage. Le seed est idempotent : il vérifie l'existence des
+    données avant d'insérer, aucun doublon en local.
+    """
+    from .seed import seed
+
+    init_db()
+    seed()
+
+
+# ---------------------------------------------------------------------------
+# Service du frontend (monté APRÈS toutes les routes /api/...)
+# ---------------------------------------------------------------------------
+
+# Chemin absolu vers le dossier frontend, quelle que soit la racine d'exécution
+FRONTEND_DIR = os.path.realpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend")
+)
+
+# Monté en dernier : les routes /api/... et /panneaux déclarées ci-dessus
+# gardent la priorité ; tout le reste sert l'interface statique.
+app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+
+
+# ---------------------------------------------------------------------------
+# Point d'entrée (exécution directe)
+# ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    import uvicorn
+
+    # Render (et la plupart des PaaS) exposent le port via la variable PORT
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=port)

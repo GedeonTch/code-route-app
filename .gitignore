@@ -1,0 +1,25 @@
+# Environnement virtuel Python
+venv/
+env/
+.venv/
+
+# Fichiers Python compilés
+__pycache__/
+*.pyc
+*.pyo
+
+# Base de données générée (recréée par seed.py)
+backend/permis_plus.db
+*.db
+*.sqlite3
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Éditeurs / IDE
+.vscode/
+.idea/
+
+# Variables d'environnement (si tu en ajoutes plus tard)
+.env

@@ -1,0 +1,1425 @@
+<!doctype html>
+<html lang="fr" data-theme="cockpit">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>PERMIS+ — Code de la Route</title>
+        <!-- Google Fonts -->
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <!-- BANDEAU ADMIN (visible uniquement pour les admins) -->
+        <div id="adminRibbon" class="admin-ribbon hidden">
+            MODE ADMINISTRATION
+        </div>
+
+        <!-- NAVBAR (cachée sur landing) -->
+        <nav id="navbar" class="navbar hidden">
+            <div class="nav-logo">PERMIS<span class="accent">+</span></div>
+            <div class="nav-links">
+                <a href="#" class="nav-link" data-view="dashboard">Dashboard</a>
+                <a href="#" class="nav-link" data-view="quiz-config">Quiz</a>
+                <a href="#" class="nav-link" data-view="catalogue">Catalogue</a>
+                <a href="#" class="nav-link" data-view="historique"
+                    >Historique</a
+                >
+                <a href="#" class="nav-link" data-view="classement">
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                        />
+                    </svg>
+                    Classement
+                </a>
+                <a
+                    href="#"
+                    class="nav-link hidden"
+                    id="adminNavLink"
+                    data-view="admin"
+                    >Admin</a
+                >
+            </div>
+            <div class="nav-actions">
+                <div class="nav-user-meta hidden" id="navUserMeta">
+                    <span id="navUserName">Conducteur</span>
+                    <span id="navAdminBadge" class="admin-badge hidden"
+                        >ADMIN</span
+                    >
+                </div>
+                <!-- Sélecteur thème -->
+                <div class="theme-selector" id="themeSelector">
+                    <button
+                        class="theme-btn"
+                        id="themeBtnToggle"
+                        title="Changer de thème"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle cx="12" cy="12" r="3" />
+                            <path
+                                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                            />
+                        </svg>
+                    </button>
+                    <div class="theme-dropdown hidden" id="themeDropdown">
+                        <button class="theme-option" data-theme="cockpit">
+                            <span
+                                class="theme-dot"
+                                style="background: #e8a020"
+                            ></span>
+                            Cockpit
+                        </button>
+                        <button class="theme-option" data-theme="aurora">
+                            <span
+                                class="theme-dot"
+                                style="background: #00dfa2"
+                            ></span>
+                            Aurora
+                        </button>
+                        <button class="theme-option" data-theme="ember">
+                            <span
+                                class="theme-dot"
+                                style="background: #ff4d6d"
+                            ></span>
+                            Ember
+                        </button>
+                        <button class="theme-option" data-theme="daylight">
+                            <span
+                                class="theme-dot"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #4f8cff,
+                                        #ffc857
+                                    );
+                                "
+                            ></span>
+                            Daylight
+                        </button>
+                    </div>
+                </div>
+                <!-- Mute -->
+                <button
+                    class="icon-btn"
+                    id="muteBtn"
+                    title="Activer/Désactiver le son"
+                >
+                    <svg
+                        id="soundIcon"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                        <path
+                            d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"
+                        />
+                    </svg>
+                </button>
+                <!-- Avatar / Profil -->
+                <button class="avatar-btn" id="avatarBtn" data-view="profil">
+                    <span id="avatarInitials">?</span>
+                </button>
+                <!-- Logout -->
+                <button class="icon-btn" id="logoutBtn" title="Déconnexion">
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
+                        />
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- CONTENEUR PRINCIPAL DES VUES -->
+        <main id="app">
+            <!-- VUE 1: LANDING / AUTH -->
+            <section id="view-landing" class="view active">
+                <!-- Canvas Three.js en arrière-plan -->
+                <canvas id="canvas-landing"></canvas>
+                <!-- SVG réseau de routes animé -->
+                <div class="road-network" id="roadNetwork"></div>
+
+                <div class="auth-container">
+                    <div class="landing-scene-legend" aria-hidden="true">
+                        <div class="scene-legend-badge">
+                            3D code de la route
+                        </div>
+                        <h2>Entrez dans l’univers du permis.</h2>
+                        <p>
+                            Voyez. Retenez. Réussissez. Révisez les panneaux,
+                            testez vos réflexes et progressez dans une interface
+                            pensée pour réussir le code.
+                        </p>
+                    </div>
+                    <div class="auth-card-3d-wrapper">
+                    <div class="auth-card">
+                        <div class="auth-logo">
+                            PERMIS<span class="accent">+</span>
+                        </div>
+                        <p class="auth-tagline">
+                            Maîtrisez la route. Passez votre code.
+                        </p>
+
+                        <!-- Toggle Login/Register -->
+                        <div class="auth-toggle">
+                            <span id="toggleLogin" class="toggle-active"
+                                >Connexion</span
+                            >
+                            <span class="toggle-sep">·</span>
+                            <span id="toggleRegister">Inscription</span>
+                        </div>
+
+                        <!-- Formulaire Connexion -->
+                        <form id="formLogin" class="auth-form">
+                            <div class="field-group">
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    id="loginEmail"
+                                    placeholder="votre@email.com"
+                                    required
+                                />
+                            </div>
+                            <div class="field-group">
+                                <label>Mot de passe</label>
+                                <input
+                                    type="password"
+                                    id="loginPassword"
+                                    placeholder="••••••••"
+                                    required
+                                />
+                            </div>
+                            <div class="error-msg hidden" id="loginError"></div>
+                            <button type="submit" class="btn-primary btn-full">
+                                Se connecter →
+                            </button>
+                            
+                        </form>
+
+                        <!-- Formulaire Inscription -->
+                        <form id="formRegister" class="auth-form hidden">
+                            <div class="field-row">
+                                <div class="field-group">
+                                    <label>Prénom</label>
+                                    <input
+                                        type="text"
+                                        id="regPrenom"
+                                        placeholder="Jean"
+                                        required
+                                    />
+                                </div>
+                                <div class="field-group">
+                                    <label>Nom</label>
+                                    <input
+                                        type="text"
+                                        id="regNom"
+                                        placeholder="Dupont"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    id="regEmail"
+                                    placeholder="votre@email.com"
+                                    required
+                                />
+                            </div>
+                            <div class="field-group">
+                                <label>Mot de passe</label>
+                                <input
+                                    type="password"
+                                    id="regPassword"
+                                    placeholder="••••••••"
+                                    required
+                                />
+                            </div>
+                            <div
+                                class="error-msg hidden"
+                                id="registerError"
+                            ></div>
+                            <button type="submit" class="btn-primary btn-full">
+                                Créer mon compte →
+                            </button>
+                        </form>
+                    </div>
+                    </div><!-- /.auth-card-3d-wrapper -->
+                    <svg class="auth-road-lines" viewBox="0 0 420 180" preserveAspectRatio="none" aria-hidden="true">
+                        <line x1="210" y1="0" x2="210" y2="180" />
+                        <line x1="170" y1="0" x2="170" y2="180" />
+                        <line x1="250" y1="0" x2="250" y2="180" />
+                    </svg>
+                    <p class="landing-subtitle">
+                        Votre succès au code commence ici.
+                    </p>
+                </div>
+            </section>
+
+            <!-- VUE 2: DASHBOARD -->
+            <section id="view-dashboard" class="view hidden">
+                <div class="view-content">
+                    <!-- Bande 1: Salutation -->
+                    <div class="dashboard-header">
+                        <div>
+                            <h1 class="greeting" id="greetingText">
+                                Bonsoir,
+                                <span id="greetingName">Conducteur</span>
+                            </h1>
+                            <p class="greeting-sub">
+                                Prêt à progresser aujourd'hui ?
+                            </p>
+                        </div>
+                        <div class="date-display" id="dateDisplay"></div>
+                    </div>
+
+                    <!-- Bande 2: Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="statQuizFaits">0</div>
+                            <div class="stat-label">Quiz complétés</div>
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" id="barQuiz"></div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="statMeilleurScore">
+                                0%
+                            </div>
+                            <div class="stat-label">Meilleur score</div>
+                            <div class="stat-bar">
+                                <div
+                                    class="stat-bar-fill"
+                                    id="barMeilleur"
+                                ></div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="statMoyenne">0%</div>
+                            <div class="stat-label">Moyenne générale</div>
+                            <div class="stat-bar">
+                                <div
+                                    class="stat-bar-fill"
+                                    id="barMoyenne"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bande 3: Actions -->
+                    <div class="actions-grid">
+                        <div
+                            class="action-card action-primary"
+                            data-view="quiz-config"
+                        >
+                            <div class="action-icon">
+                                <svg
+                                    width="40"
+                                    height="40"
+                                    viewBox="0 0 40 40"
+                                    fill="none"
+                                >
+                                    <circle
+                                        cx="20"
+                                        cy="20"
+                                        r="18"
+                                        stroke="currentColor"
+                                        stroke-width="1.5"
+                                    />
+                                    <path
+                                        d="M15 20h10M20 15v10"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    />
+                                    <circle
+                                        cx="20"
+                                        cy="20"
+                                        r="4"
+                                        fill="currentColor"
+                                        opacity="0.3"
+                                    />
+                                </svg>
+                            </div>
+                            <div class="action-content">
+                                <h3>Commencer un Quiz</h3>
+                                <p>
+                                    Testez vos connaissances avec un quiz
+                                    chronométré et notez vos progrès
+                                </p>
+                            </div>
+                            <span class="action-arrow">→</span>
+                        </div>
+                        <div
+                            class="action-card action-secondary"
+                            data-view="catalogue"
+                        >
+                            <div class="action-icon">
+                                <svg
+                                    width="36"
+                                    height="36"
+                                    viewBox="0 0 36 36"
+                                    fill="none"
+                                >
+                                    <rect
+                                        x="3"
+                                        y="3"
+                                        width="30"
+                                        height="30"
+                                        rx="4"
+                                        stroke="currentColor"
+                                        stroke-width="1.5"
+                                    />
+                                    <path
+                                        d="M9 12h18M9 18h14M9 24h10"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
+                            </div>
+                            <div class="action-content">
+                                <h3>Consulter le Catalogue</h3>
+                                <p>
+                                    Parcourez les 20 panneaux routiers avec
+                                    leurs significations détaillées
+                                </p>
+                            </div>
+                            <span class="action-arrow">→</span>
+                        </div>
+                    </div>
+
+                    <!-- Graphique progression -->
+                    <div class="chart-section">
+                        <h3 class="section-title">
+                            Progression des 10 dernières sessions
+                        </h3>
+                        <canvas id="progressChart" height="120"></canvas>
+                        <p class="chart-empty" id="chartEmpty">
+                            Complétez votre premier quiz pour voir votre
+                            progression ici.
+                        </p>
+                    </div>
+
+                    <!-- Niveau actuel -->
+                    <div class="niveau-badge-container">
+                        <div class="niveau-badge" id="dashNiveauBadge">
+                            <span class="niveau-icon" id="dashNiveauIcon"
+                                >🟤</span
+                            >
+                            <span class="niveau-nom" id="dashNiveauNom"
+                                >Débutant</span
+                            >
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VUE 3: CONFIG QUIZ -->
+            <section id="view-quiz-config" class="view hidden">
+                <div class="view-content centered">
+                    <div class="config-card">
+                        <h2 class="config-title">Configurer votre Quiz</h2>
+
+                        <div class="config-section">
+                            <label class="config-label"
+                                >Nombre de questions</label
+                            >
+                            <div class="toggle-group" id="nbQuestionsGroup">
+                                <button
+                                    class="toggle-btn active"
+                                    data-value="5"
+                                >
+                                    5
+                                </button>
+                                <button class="toggle-btn" data-value="10">
+                                    10
+                                </button>
+                                <button class="toggle-btn" data-value="15">
+                                    15
+                                </button>
+                                <button class="toggle-btn" data-value="20">
+                                    20
+                                </button>
+                                <button class="toggle-btn" data-value="30">
+                                    30
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="config-section">
+                            <label class="config-label">Catégorie</label>
+                            <div
+                                class="toggle-group cat-group"
+                                id="categorieGroup"
+                            >
+                                <button
+                                    class="toggle-btn cat-btn active"
+                                    data-value="all"
+                                >
+                                    Toutes
+                                </button>
+                                <button
+                                    class="toggle-btn cat-btn cat-danger"
+                                    data-value="danger"
+                                >
+                                    Danger
+                                </button>
+                                <button
+                                    class="toggle-btn cat-btn cat-interdiction"
+                                    data-value="interdiction"
+                                >
+                                    Interdiction
+                                </button>
+                                <button
+                                    class="toggle-btn cat-btn cat-obligation"
+                                    data-value="obligation"
+                                >
+                                    Obligation
+                                </button>
+                                <button
+                                    class="toggle-btn cat-btn cat-information"
+                                    data-value="information"
+                                >
+                                    Information
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="config-actions">
+                            <button class="btn-secondary" id="btnReviser">
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                                    />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                                Réviser d'abord
+                            </button>
+                            <button class="btn-primary" id="btnLancerQuiz">
+                                Lancer le Quiz →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VUE 4: QUIZ -->
+            <section id="view-quiz" class="view hidden">
+                <!-- Timer bar (sous la navbar) -->
+                <div class="timer-bar-container">
+                    <div class="timer-bar" id="timerBar"></div>
+                </div>
+
+                <div class="quiz-container">
+                    <!-- Zone gauche: Panneau -->
+                    <div class="quiz-left">
+                        <div class="panneau-frame" id="quizPanneauFrame">
+                            <img
+                                id="quizPanneauImg"
+                                src=""
+                                alt="Panneau routier"
+                                onerror="
+                                    this.style.display = 'none';
+                                    document.getElementById(
+                                        'quizPanneauSvg',
+                                    ).style.display = 'block';
+                                "
+                            />
+                            <div
+                                id="quizPanneauSvg"
+                                class="panneau-placeholder"
+                                style="display: none"
+                            ></div>
+                        </div>
+                        <div class="panneau-info">
+                            <span class="cat-badge" id="quizCategorieBadge"
+                                >Danger</span
+                            >
+                        </div>
+                        <!-- Bot ROADY -->
+                        <button class="indice-btn" id="indiceBtn">
+                            <span class="roady-icon" aria-hidden="true">
+                                <svg
+                                    width="22"
+                                    height="22"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <rect x="3" y="8" width="18" height="12" rx="3" />
+                                    <path d="M7 8V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3" />
+                                    <circle cx="8.5" cy="14" r="1.2" fill="currentColor" stroke="none" />
+                                    <circle cx="15.5" cy="14" r="1.2" fill="currentColor" stroke="none" />
+                                    <path d="M9 17.5h6" stroke-linecap="round" />
+                                    <path d="M12 3v2M3 14H1M23 14h-2" stroke-linecap="round" />
+                                </svg>
+                            </span>
+                            <span class="roady-btn-copy">
+                                <strong>ROADY</strong>
+                                <small>Demander un indice</small>
+                            </span>
+                        </button>
+                        <div class="roady-bubble hidden" id="roadyBubble">
+                            <div class="roady-header">
+                                <span class="roady-name">🚗 ROADY</span>
+                                <button class="roady-close" id="roadyClose">
+                                    ×
+                                </button>
+                            </div>
+                            <p class="roady-text" id="roadyText"></p>
+                        </div>
+                    </div>
+
+                    <!-- Zone droite: Question -->
+                    <div class="quiz-right">
+                        <div class="quiz-progress-header">
+                            <span class="question-counter" id="questionCounter"
+                                >Question 1 / 10</span
+                            >
+                            <div class="question-dots" id="questionDots"></div>
+                            <button class="quiz-exit-btn" id="btnQuitQuiz" type="button">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 6 6 18M6 6l12 12" />
+                                </svg>
+                                Quitter
+                            </button>
+                        </div>
+
+                        <!-- Question -->
+                        <div class="question-card">
+                            <p class="question-text" id="questionText">
+                                Que signifie ce panneau ?
+                            </p>
+
+                            <div class="answers-grid" id="answersGrid">
+                                <button class="answer-btn" data-choice="A">
+                                    <span class="answer-letter">A</span>
+                                    <span
+                                        class="answer-text"
+                                        id="answerA"
+                                    ></span>
+                                </button>
+                                <button class="answer-btn" data-choice="B">
+                                    <span class="answer-letter">B</span>
+                                    <span
+                                        class="answer-text"
+                                        id="answerB"
+                                    ></span>
+                                </button>
+                                <button class="answer-btn" data-choice="C">
+                                    <span class="answer-letter">C</span>
+                                    <span
+                                        class="answer-text"
+                                        id="answerC"
+                                    ></span>
+                                </button>
+                                <button class="answer-btn" data-choice="D">
+                                    <span class="answer-letter">D</span>
+                                    <span
+                                        class="answer-text"
+                                        id="answerD"
+                                    ></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Canvas particules bonne réponse -->
+                <canvas id="canvas-particles" class="particles-canvas"></canvas>
+            </section>
+
+            <!-- VUE 5: RÉSULTATS -->
+            <section id="view-resultats" class="view hidden">
+                <canvas id="canvas-confetti" class="confetti-canvas"></canvas>
+                <div class="view-content centered">
+                    <div class="results-card">
+                        <h2 class="results-title">Résultats du Quiz</h2>
+                        <div class="results-score-big" id="resultScore">0</div>
+                        <div class="results-note-label">/20</div>
+                        <div class="results-mention" id="resultMention">—</div>
+
+                        <div class="results-details">
+                            <div class="result-detail">
+                                <span class="detail-label"
+                                    >Bonnes réponses</span
+                                >
+                                <span class="detail-value" id="resultBonnes"
+                                    >—</span
+                                >
+                            </div>
+                            <div class="result-detail">
+                                <span class="detail-label">Durée</span>
+                                <span class="detail-value" id="resultDuree"
+                                    >—</span
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Accordion corrections -->
+                        <div class="corrections-section">
+                            <button
+                                class="corrections-toggle"
+                                id="correctionsToggle"
+                            >
+                                <span>Voir les corrections</span>
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <polyline points="6 9 12 15 18 9" />
+                                </svg>
+                            </button>
+                            <div
+                                class="corrections-list hidden"
+                                id="correctionsList"
+                            ></div>
+                        </div>
+
+                        <div class="results-actions">
+                            <button class="btn-secondary" id="btnRecommencer">
+                                Recommencer
+                            </button>
+                            <button class="btn-primary" id="btnDashboard">
+                                Retour au Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VUE 6: CATALOGUE -->
+            <section id="view-catalogue" class="view hidden">
+                <div class="view-content">
+                    <div class="catalogue-header">
+                        <h2 class="view-title">Catalogue des Panneaux</h2>
+                        <div class="catalogue-controls">
+                            <div class="search-bar">
+                                <svg
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path d="M21 21l-4.35-4.35" />
+                                </svg>
+                                <input
+                                    type="text"
+                                    id="searchInput"
+                                    placeholder="Rechercher un panneau..."
+                                />
+                            </div>
+                            <div class="cat-filters" id="catFilters">
+                                <button
+                                    class="cat-filter active"
+                                    data-cat="all"
+                                >
+                                    Tous
+                                </button>
+                                <button
+                                    class="cat-filter cat-danger"
+                                    data-cat="danger"
+                                >
+                                    Danger
+                                </button>
+                                <button
+                                    class="cat-filter cat-interdiction"
+                                    data-cat="interdiction"
+                                >
+                                    Interdiction
+                                </button>
+                                <button
+                                    class="cat-filter cat-obligation"
+                                    data-cat="obligation"
+                                >
+                                    Obligation
+                                </button>
+                                <button
+                                    class="cat-filter cat-information"
+                                    data-cat="information"
+                                >
+                                    Information
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panneaux-grid" id="panneauxGrid"></div>
+                </div>
+            </section>
+
+            <!-- VUE 7: HISTORIQUE -->
+            <section id="view-historique" class="view hidden">
+                <div class="view-content">
+                    <h2 class="view-title">Historique des Sessions</h2>
+                    <div
+                        class="historique-summary"
+                        id="historiqueSummary"
+                    ></div>
+                    <div class="historique-table" id="historiqueTable">
+                        <div class="table-header">
+                            <span>Date</span>
+                            <span>Questions</span>
+                            <span>Score</span>
+                            <span>Note/20</span>
+                            <span>Durée</span>
+                        </div>
+                        <div class="table-body" id="tableBody"></div>
+                    </div>
+                    <!-- Détail session -->
+                    <div class="session-detail hidden" id="sessionDetail"></div>
+                </div>
+            </section>
+
+            <!-- VUE 8: MODE FLASH -->
+            <section id="view-flash" class="view hidden">
+                <div class="flash-progress-bar">
+                    <div class="flash-bar-fill" id="flashBarFill"></div>
+                </div>
+                <div class="flash-container">
+                    <div class="flash-card" id="flashCard">
+                        <div class="flash-panneau-frame">
+                            <img id="flashImg" src="" alt="" />
+                            <div
+                                id="flashSvgPlaceholder"
+                                class="panneau-placeholder"
+                                style="display: none"
+                            ></div>
+                        </div>
+                        <div
+                            class="flash-signification hidden"
+                            id="flashSignification"
+                        ></div>
+                    </div>
+                </div>
+                <div class="flash-footer">
+                    <span class="flash-counter" id="flashCounter">1 / 10</span>
+                    <button class="btn-secondary" id="flashPause">
+                        ⏸ Pause
+                    </button>
+                    <button class="btn-primary hidden" id="btnPasserQuiz">
+                        Passer au Quiz →
+                    </button>
+                </div>
+                <div class="flash-end hidden" id="flashEnd">
+                    <div class="flash-end-card">
+                        <h2>Révision terminée. Prêt pour le quiz ?</h2>
+                        <div class="flash-end-actions">
+                            <button
+                                class="btn-secondary"
+                                id="btnRevisionRevoir"
+                            >
+                                Revoir
+                            </button>
+                            <button class="btn-primary" id="btnRevisionLancer">
+                                Lancer le Quiz →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VUE 9: CLASSEMENT -->
+            <section id="view-classement" class="view hidden">
+                <div class="view-content">
+                    <h2 class="view-title">Classement</h2>
+
+                    <!-- Podium top 3 -->
+                    <div class="podium" id="podium"></div>
+
+                    <!-- Tableau top 10 -->
+                    <div class="classement-table" id="classementTable">
+                        <div class="table-header">
+                            <span>Rang</span>
+                            <span>Conducteur</span>
+                            <span>Meilleure Note</span>
+                            <span>Date</span>
+                        </div>
+                        <div class="table-body" id="classementBody"></div>
+                    </div>
+
+                    <p class="classement-hint hidden" id="classementHint">
+                        Termine un quiz pour apparaître dans le classement.
+                    </p>
+                </div>
+            </section>
+
+            <!-- VUE 10: PROFIL / NIVEAUX -->
+            <section id="view-profil" class="view hidden">
+                <div class="view-content">
+                    <div class="profil-header">
+                        <div
+                            class="profil-avatar-big"
+                            id="profilAvatarBig"
+                        ></div>
+                        <div class="profil-info">
+                            <h2 id="profilNomComplet">—</h2>
+                            <p id="profilEmail">—</p>
+                        </div>
+                    </div>
+
+                    <!-- Niveau actuel -->
+                    <div class="niveau-display" id="niveauDisplay">
+                        <div
+                            class="niveau-current-icon"
+                            id="niveauCurrentIcon"
+                        ></div>
+                        <div class="niveau-current-name" id="niveauCurrentName">
+                            Débutant
+                        </div>
+                        <div class="niveau-progress-bar">
+                            <div
+                                class="niveau-progress-fill"
+                                id="niveauProgressFill"
+                            ></div>
+                        </div>
+                        <p class="niveau-next-info" id="niveauNextInfo"></p>
+                    </div>
+
+                    <!-- Liste des niveaux -->
+                    <div class="niveaux-list">
+                        <div class="niveau-item" data-niveau="Débutant">
+                            <div class="niveau-item-icon brun"></div>
+                            <div class="niveau-item-info">
+                                <span class="niveau-item-name">Débutant</span>
+                                <span class="niveau-item-req"
+                                    >Point de départ</span
+                                >
+                            </div>
+                        </div>
+                        <div
+                            class="niveau-item"
+                            data-niveau="Apprenti Conducteur"
+                        >
+                            <div class="niveau-item-icon bleu"></div>
+                            <div class="niveau-item-info">
+                                <span class="niveau-item-name"
+                                    >Apprenti Conducteur</span
+                                >
+                                <span class="niveau-item-req"
+                                    >3+ quiz · moyenne ≥ 8/20</span
+                                >
+                            </div>
+                        </div>
+                        <div
+                            class="niveau-item"
+                            data-niveau="Conducteur Confirmé"
+                        >
+                            <div class="niveau-item-icon vert"></div>
+                            <div class="niveau-item-info">
+                                <span class="niveau-item-name"
+                                    >Conducteur Confirmé</span
+                                >
+                                <span class="niveau-item-req"
+                                    >6+ quiz · moyenne ≥ 12/20</span
+                                >
+                            </div>
+                        </div>
+                        <div
+                            class="niveau-item"
+                            data-niveau="Expert de la Route"
+                        >
+                            <div class="niveau-item-icon jaune"></div>
+                            <div class="niveau-item-info">
+                                <span class="niveau-item-name"
+                                    >Expert de la Route</span
+                                >
+                                <span class="niveau-item-req"
+                                    >10+ quiz · moyenne ≥ 15/20</span
+                                >
+                            </div>
+                        </div>
+                        <div class="niveau-item" data-niveau="As du Volant">
+                            <div class="niveau-item-icon rouge"></div>
+                            <div class="niveau-item-info">
+                                <span class="niveau-item-name"
+                                    >As du Volant</span
+                                >
+                                <span class="niveau-item-req"
+                                    >15+ quiz · moyenne ≥ 18/20</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certifications reçues -->
+                    <div class="certifications-section hidden" id="certifSection">
+                        <h3 class="section-title">🏆 Mes Certifications</h3>
+                        <div id="certifList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VUE 11: ADMINISTRATION -->
+            <section id="view-admin" class="view hidden">
+                <div class="admin-shell">
+                    <aside class="admin-sidebar">
+                        <div>
+                            <p class="admin-sidebar-kicker">
+                                Back-office PERMIS+
+                            </p>
+                            <h2>Administration</h2>
+                            <p class="admin-sidebar-text">
+                                Pilotez les utilisateurs, le catalogue de
+                                panneaux et les indicateurs clés depuis la SPA.
+                            </p>
+                        </div>
+
+                        <div class="admin-sidebar-nav" id="adminSidebarNav">
+                            <button
+                                class="admin-nav-btn active"
+                                data-admin-section="dashboard"
+                            >
+                                Tableau de bord
+                            </button>
+                            <button
+                                class="admin-nav-btn"
+                                data-admin-section="users"
+                            >
+                                Utilisateurs
+                            </button>
+                            <button
+                                class="admin-nav-btn"
+                                data-admin-section="panneaux"
+                            >
+                                Panneaux
+                            </button>
+                            <button
+                                class="admin-nav-btn"
+                                data-admin-section="certifications"
+                            >
+                                🏆 Certifications
+                            </button>
+                        </div>
+
+                        <button
+                            class="btn-secondary admin-back-btn"
+                            id="adminBackBtn"
+                        >
+                            ← Retour à l'app
+                        </button>
+                    </aside>
+
+                    <div class="admin-main">
+                        <section
+                            class="admin-section active"
+                            id="adminSectionDashboard"
+                        >
+                            <div class="admin-section-head">
+                                <div>
+                                    <p class="admin-section-kicker">
+                                        Vue d'ensemble
+                                    </p>
+                                    <h2>Tableau de bord</h2>
+                                </div>
+                                <button
+                                    class="btn-secondary"
+                                    id="adminRefreshDashboard"
+                                >
+                                    Actualiser
+                                </button>
+                            </div>
+                            <div
+                                class="admin-stats-grid"
+                                id="adminStatsGrid"
+                            ></div>
+                            <div class="admin-panel">
+                                <div class="admin-panel-head">
+                                    <h3>5 dernières inscriptions</h3>
+                                    <span
+                                        class="admin-panel-meta"
+                                        id="adminLatestCount"
+                                        >0 élément</span
+                                    >
+                                </div>
+                                <div class="admin-table admin-table-compact">
+                                    <div
+                                        class="table-header admin-users-header"
+                                    >
+                                        <span>Utilisateur</span>
+                                        <span>Email</span>
+                                        <span>Niveau</span>
+                                        <span>Date</span>
+                                    </div>
+                                    <div
+                                        class="table-body"
+                                        id="adminLatestTableBody"
+                                    ></div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section
+                            class="admin-section hidden"
+                            id="adminSectionUsers"
+                        >
+                            <div class="admin-section-head">
+                                <div>
+                                    <p class="admin-section-kicker">
+                                        Gestion des comptes
+                                    </p>
+                                    <h2>Utilisateurs</h2>
+                                </div>
+                                <button
+                                    class="btn-primary"
+                                    id="adminAddUserBtn"
+                                >
+                                    Ajouter un utilisateur
+                                </button>
+                            </div>
+                            <div class="admin-toolbar">
+                                <div class="search-bar admin-search-bar">
+                                    <svg
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="M21 21l-4.35-4.35" />
+                                    </svg>
+                                    <input
+                                        type="text"
+                                        id="adminUserSearch"
+                                        placeholder="Rechercher un utilisateur..."
+                                    />
+                                </div>
+                                <button
+                                    class="btn-secondary"
+                                    id="adminRefreshUsers"
+                                >
+                                    Rafraîchir
+                                </button>
+                            </div>
+                            <div class="admin-table">
+                                <div class="table-header admin-users-header">
+                                    <span>Utilisateur</span>
+                                    <span>Email</span>
+                                    <span>Rôle</span>
+                                    <span>Niveau</span>
+                                    <span>Inscription</span>
+                                    <span>Quiz</span>
+                                    <span></span>Actions</span>
+                                </div>
+                                <div
+                                    class="table-body"
+                                    id="adminUsersTableBody"
+                                ></div>
+                            </div>
+                        </section>
+
+                        <section
+                            class="admin-section hidden"
+                            id="adminSectionPanneaux"
+                        >
+                            <div class="admin-section-head">
+                                <div>
+                                    <p class="admin-section-kicker">
+                                        Gestion du catalogue
+                                    </p>
+                                    <h2>Panneaux</h2>
+                                </div>
+                                <button
+                                    class="btn-primary"
+                                    id="adminAddPanneauBtn"
+                                >
+                                    Ajouter un panneau
+                                </button>
+                            </div>
+                            <div class="admin-toolbar admin-toolbar-wrap">
+                                <div class="search-bar admin-search-bar">
+                                    <svg
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="M21 21l-4.35-4.35" />
+                                    </svg>
+                                    <input
+                                        type="text"
+                                        id="adminPanneauSearch"
+                                        placeholder="Rechercher un panneau..."
+                                    />
+                                </div>
+                                <div
+                                    class="cat-filters"
+                                    id="adminPanneauFilters"
+                                >
+                                    <button
+                                        class="cat-filter active"
+                                        data-cat="all"
+                                    >
+                                        Tous
+                                    </button>
+                                    <button
+                                        class="cat-filter cat-danger"
+                                        data-cat="danger"
+                                    >
+                                        Danger
+                                    </button>
+                                    <button
+                                        class="cat-filter cat-interdiction"
+                                        data-cat="interdiction"
+                                    >
+                                        Interdiction
+                                    </button>
+                                    <button
+                                        class="cat-filter cat-obligation"
+                                        data-cat="obligation"
+                                    >
+                                        Obligation
+                                    </button>
+                                    <button
+                                        class="cat-filter cat-information"
+                                        data-cat="information"
+                                    >
+                                        Information
+                                    </button>
+                                </div>
+                                <button
+                                    class="btn-secondary"
+                                    id="adminRefreshPanneaux"
+                                >
+                                    Rafraîchir
+                                </button>
+                            </div>
+                            <div
+                                class="admin-panneaux-grid"
+                                id="adminPanneauxGrid"
+                            ></div>
+                        </section>
+
+                        <!-- SECTION CERTIFICATIONS -->
+                        <section
+                            class="admin-section hidden"
+                            id="adminSectionCertifications"
+                        >
+                            <div class="admin-section-head">
+                                <div>
+                                    <p class="admin-section-kicker">As du Volant</p>
+                                    <h2>Certifications</h2>
+                                </div>
+                                <button class="btn-primary" id="adminEmettreBtn">
+                                    🏆 Émettre une certification
+                                </button>
+                            </div>
+
+                            <!-- Onglets éligibles / déjà certifiés -->
+                            <div class="cert-tabs">
+                                <button class="cert-tab active" data-cert-tab="eligibles">
+                                    ⭐ Éligibles
+                                    <span class="cert-tab-count" id="certEligiblesCount">0</span>
+                                </button>
+                                <button class="cert-tab" data-cert-tab="emises">
+                                    🏆 Certifications émises
+                                    <span class="cert-tab-count" id="certEmisesCount">0</span>
+                                </button>
+                            </div>
+
+                            <!-- Panneau éligibles -->
+                            <div class="cert-tab-panel" id="certPanelEligibles">
+                                <div class="admin-table">
+                                    <div class="table-header admin-cert-elig-header">
+                                        <span>Utilisateur</span>
+                                        <span>Quiz</span>
+                                        <span>Meilleure note</span>
+                                        <span>Moyenne</span>
+                                        <span>Statut</span>
+                                        <span>Action</span>
+                                    </div>
+                                    <div class="table-body" id="adminEligiblesBody"></div>
+                                </div>
+                            </div>
+
+                            <!-- Panneau certifications émises -->
+                            <div class="cert-tab-panel hidden" id="certPanelEmises">
+                                <div class="admin-table">
+                                    <div class="table-header admin-cert-header">
+                                        <span>Utilisateur</span>
+                                        <span>ID Certification</span>
+                                        <span>Date</span>
+                                        <span>Actions</span>
+                                    </div>
+                                    <div class="table-body" id="adminCertTableBody"></div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- MODALE PANNEAU CATALOGUE -->
+        <div class="modal-overlay hidden" id="modalOverlay">
+            <div class="modal-card" id="modalCard">
+                <button class="modal-close" id="modalClose">×</button>
+                <div class="modal-content">
+                    <div class="modal-img-frame">
+                        <img id="modalImg" src="" alt="" />
+                        <div
+                            id="modalSvgPlaceholder"
+                            class="panneau-placeholder"
+                            style="display: none"
+                        ></div>
+                    </div>
+                    <div class="modal-info">
+                        <span class="cat-badge" id="modalCategorie"></span>
+                        <h3 id="modalNom"></h3>
+                        <p
+                            class="modal-signification"
+                            id="modalSignification"
+                        ></p>
+                        <p class="modal-description" id="modalDescription"></p>
+                        <button class="btn-primary" id="modalTestBtn">
+                            Tester ce panneau →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALE ADMIN GÉNÉRIQUE -->
+        <div class="modal-overlay hidden" id="adminModalOverlay">
+            <div class="modal-card admin-modal-card" id="adminModalCard">
+                <button class="modal-close" id="adminModalClose">×</button>
+                <div id="adminModalContent"></div>
+            </div>
+        </div>
+
+        <!-- Toast notifications -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Dialog confirmation quitter quiz -->
+        <div class="confirm-overlay hidden" id="confirmQuitOverlay" role="dialog" aria-modal="true" aria-labelledby="confirmQuitTitle">
+            <div class="confirm-card">
+                <h3 id="confirmQuitTitle">⚠️ Quitter le quiz ?</h3>
+                <p>Votre progression sera perdue et le quiz ne sera pas comptabilisé. Êtes-vous sûr de vouloir quitter ?</p>
+                <div class="confirm-actions">
+                    <button class="btn-secondary" id="confirmQuitCancel">Continuer le quiz</button>
+                    <button class="btn-secondary danger-outline" id="confirmQuitOk">Oui, quitter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALE CERTIFICAT (rendu visuel premium) -->
+        <div class="cert-modal-overlay hidden" id="certModalOverlay">
+            <div class="cert-modal-wrapper">
+                <div class="cert-modal-actions">
+                    <button class="btn-primary" id="certDownloadBtn">⬇ Télécharger (PNG)</button>
+                    <button class="btn-secondary" id="certCloseBtn">✕ Fermer</button>
+                </div>
+                <!-- Zone du certificat — capturée par html2canvas -->
+                <div class="certificat-premium" id="certificatPremium">
+                    <div class="cert-border-outer">
+                        <div class="cert-border-inner">
+                            <div class="cert-header">
+                                <div class="cert-logo-line">
+                                    <span class="cert-logo-text">PERMIS<span class="cert-logo-plus">+</span></span>
+                                    <span class="cert-trophy">🏆</span>
+                                </div>
+                                <div class="cert-title-block">
+                                    <h1 class="cert-main-title">CERTIFICAT DE MAÎTRISE</h1>
+                                    <h2 class="cert-sub-title">DU CODE DE LA ROUTE</h2>
+                                </div>
+                                <div class="cert-divider-gold"></div>
+                            </div>
+
+                            <div class="cert-body">
+                                <p class="cert-intro-text">Ce certificat est décerné à</p>
+                                <div class="cert-recipient-name" id="certRecipientName">Jean Dupont</div>
+                                <div class="cert-level-badge">
+                                    <span class="cert-level-icon">🔴</span>
+                                    <span class="cert-level-text">Niveau : As du Volant</span>
+                                </div>
+
+                                <div class="cert-details-grid">
+                                    <div class="cert-detail-item">
+                                        <span class="cert-detail-label">📅 Date d'obtention</span>
+                                        <span class="cert-detail-value" id="certDate">01/01/2026</span>
+                                    </div>
+                                    <div class="cert-detail-item">
+                                        <span class="cert-detail-label">🔒 ID de certification</span>
+                                        <span class="cert-detail-value cert-id-value" id="certNumero">PERMIS-2026-XXXXXX</span>
+                                    </div>
+                                </div>
+
+                                <div class="cert-divider-light"></div>
+
+                                <div class="cert-message-block" id="certMessageBlock">
+                                    <p class="cert-quote">"Félicitations ! Vous avez maîtrisé le code de la route avec excellence et êtes désormais certifié."</p>
+                                </div>
+                            </div>
+
+                            <div class="cert-footer">
+                                <div class="cert-signature-block">
+                                    <div class="cert-signature-line" id="certSignature">Gedeon Cibanvunya</div>
+                                    <div class="cert-signature-role">Directeur de l'Auto-école PERMIS+</div>
+                                </div>
+                                <div class="cert-seal">
+                                    <div class="cert-seal-inner">
+                                        <span class="cert-seal-text">CERTIFIÉ</span>
+                                        <span class="cert-seal-year" id="certSealYear">2026</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>
